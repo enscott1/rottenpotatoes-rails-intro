@@ -1,4 +1,5 @@
 class MoviesController < ApplicationController
+  helper_method :sort_column
 
   # See Section 4.5: Strong Parameters below for an explanation of this method:
   # http://guides.rubyonrails.org/action_controller_overview.html
@@ -13,7 +14,7 @@ class MoviesController < ApplicationController
   end
 
   def index
-    @movies = Movie.all
+    @movies = Movie.order(sort_column)
   end
 
   def new
@@ -46,4 +47,7 @@ class MoviesController < ApplicationController
 
   private :movie_params
   
+  def sort_column
+  Movie.column_names.include?(params[:sort]) ? params[:sort] : "title"
+  end
 end
