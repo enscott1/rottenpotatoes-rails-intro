@@ -1,5 +1,7 @@
 class MoviesController < ApplicationController
   helper_method :sort_column
+  helper_method :chosen_rating?
+  helper_method :highlight
 
   # See Section 4.5: Strong Parameters below for an explanation of this method:
   # http://guides.rubyonrails.org/action_controller_overview.html
@@ -14,7 +16,26 @@ class MoviesController < ApplicationController
   end
 
   def index
-    @movies = Movie.order(sort_column)
+    @all_ratings = Movie.all_ratings
+    session[:ratings] = params[:ratings] unless params[:ratings].nil?
+    session[:order] = params[:order] unless params[:order].nil?
+    
+    if (params[:ratings].nil? && !session[:ratings].nil?) || (params[:order].nil? && !session[:order].nil?)
+      redirect_to movies_path("ratings" => session[:ratings], "order" => session[:order])
+      
+    elsif !params[:ratings].nil? 
+      array_ratings = params[:ratings].keys
+      return @movies = Movie.where(rating: array_ratings).order(session[:order])
+      
+    elsif !params[:order].nil?
+        return @movies = Movie.all.order(session[:order])
+        
+    elsif !session[:ratings].nil? || !session[:order].nil?
+      redirect_to movies_path("ratings" => session[:ratings], "order" => session[:order])
+      
+    else
+      return @movies = Movie.all
+    end
   end
 
   def new
@@ -49,5 +70,19 @@ class MoviesController < ApplicationController
   
   def sort_column
   Movie.column_names.include?(params[:sort]) ? params[:sort] : "title"
+  end
+  
+  def highlight(column)
+    if(session[:order].to_s == column)
+      return 'hilite'
+    else
+      return nil
+    end
+  end
+
+  def chosen_rating?(rating)
+    chosen_ratings = session[:ratings]
+    return true if chosen_ratings.nil?
+    chosen_ratings.include? rating
   end
 end
