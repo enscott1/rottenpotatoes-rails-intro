@@ -1,5 +1,4 @@
 class MoviesController < ApplicationController
-  helper_method :sort_column
   helper_method :chosen_rating?
   helper_method :highlight
 
@@ -68,9 +67,6 @@ class MoviesController < ApplicationController
 
   private :movie_params
   
-  def sort_column
-  Movie.column_names.include?(params[:sort]) ? params[:sort] : "title"
-  end
   
   def highlight(column)
     if(session[:order].to_s == column)
